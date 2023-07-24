@@ -24,3 +24,19 @@ jobs:
       with:
         push: true
         tags: kozyaura/hostservice:${{ github.sha }}
+  updateYaml:
+    runs-on: ubuntu-latest
+    needs: buildImage
+    steps: 
+    - name: 1. Checkout
+      uses: actions/checkout@v3
+      with:
+        repository: "bee2947762/hostsvc-cd"
+        token: ${{ secrets.KOZY_TOKEN }}
+    - name: 2. Change Docker Tag
+      run: |
+        sed -i "s/image: kozyaura\/node-app:.*/images: kozyaura\/node-app:${{ github.sha }}/g" hostservice-deploy.yaml
+        git config --global user.email "bee2947762@gmail.com"
+        git config --global user.name "bee2947762"
+        git commit -am "triggered by github action"
+        git push origin main
